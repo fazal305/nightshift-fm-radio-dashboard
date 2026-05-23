@@ -12,6 +12,30 @@ NIGHTSHIFT FM simulates a fictional underground radio station with:
 - local audio playback
 - immersive late-night atmosphere
 
+## Live Demo
+
+Experience the live underground radio dashboard here:
+
+🔗 Live Site:
+https://fazal305.github.io/nightshift-fm-radio-dashboard/
+
+Features available in the live demo:
+- Neon late-night radio UI
+- Animated audio visualizer
+- Fake underground radio stations
+- Draggable floating widgets
+- Live listener stats
+- Fake radio chat system
+- Real-time clock
+- Dynamic station themes
+
+Note:
+Local audio files are excluded from the public repository and live demo for copyright reasons.
+To experience full audio playback, add your own local audio files inside:
+
+```txt id="pabdd4"
+assets/audio/
+
 ---
 
 ## Features
