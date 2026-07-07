@@ -1,4 +1,4 @@
-const STATION_LIST = [
+const stationList = [
   {
     id: "nightshift-fm",
     name: "NIGHTSHIFT FM",
@@ -6,22 +6,21 @@ const STATION_LIST = [
     vibe: "LO-FI",
     color: "#b967ff",
     audioSrc: "assets/audio/nightshift-fm.mp3",
+    fallbackFrequency: 110,
     dj: "DJ Sleepless",
     tracks: [
       "midnight rain / unknown artist",
       "3am coffee / lo-fi beats",
       "neon city drift / synthwave collective",
-      "can't sleep again / bedroom producer",
-      "last train home / chill hop"
+      "last train home / chill hop",
+      "empty streets / soft keys"
     ],
     chatMessages: [
-      "studying at 2am fr",
-      "this track is everything",
-      "where do I find this artist",
-      "night shift people are built different",
+      "studying late with this in the background",
+      "this track is carrying my focus",
       "volume low, vibes high",
       "this feels like rain on a window",
-      "anyone else coding rn?",
+      "anyone else coding right now",
       "DJ Sleepless never misses"
     ]
   },
@@ -32,6 +31,7 @@ const STATION_LIST = [
     vibe: "FOCUS",
     color: "#00e5ff",
     audioSrc: "assets/audio/codewave-radio.mp3",
+    fallbackFrequency: 140,
     dj: "0xAudio",
     tracks: [
       "deep focus.exe",
@@ -41,23 +41,22 @@ const STATION_LIST = [
       "localhost after dark"
     ],
     chatMessages: [
-      "shipping at 3am again",
-      "npm install going brrr",
-      "this station got me through my finals",
+      "shipping late again",
+      "this station got me through finals",
       "css finally behaving because of this beat",
-      "git push and pray",
       "debugging with this in the background",
-      "frontend gang awake?",
+      "frontend crew awake",
       "this beat fixed my layout"
     ]
   },
   {
-    id: "ghost-signal",
-    name: "GHOST SIGNAL",
+    id: "static-signal",
+    name: "STATIC SIGNAL",
     frequency: "88.8 FM",
     vibe: "DARK",
     color: "#ff3131",
-    audioSrc: "assets/audio/ghost-signal.mp3",
+    audioSrc: "assets/audio/static-signal.mp3",
+    fallbackFrequency: 82,
     dj: "The Static",
     tracks: [
       "signal lost / void",
@@ -67,14 +66,12 @@ const STATION_LIST = [
       "red light hallway / static"
     ],
     chatMessages: [
-      "who is this DJ",
-      "I found this station by accident",
-      "signal keeps cutting out for me too",
-      "is anyone else hearing whispers",
-      "this should not be on my radio",
-      "the static is part of the song right",
-      "do not tune below 88.8",
-      "something answered my request"
+      "the signal keeps cutting out",
+      "this station is strangely calming",
+      "static is part of the track",
+      "low light, high focus",
+      "this one belongs after midnight",
+      "the mix is unreal"
     ]
   },
   {
@@ -84,6 +81,7 @@ const STATION_LIST = [
     vibe: "CHILL",
     color: "#ffb000",
     audioSrc: "assets/audio/solar-drift.mp3",
+    fallbackFrequency: 176,
     dj: "Sunny Side",
     tracks: [
       "golden hour loops / ambient",
@@ -93,39 +91,24 @@ const STATION_LIST = [
       "sunbeam radio / mellow"
     ],
     chatMessages: [
-      "perfect Sunday morning station",
-      "this is my wfh playlist",
-      "tea and this station = peace",
-      "the warmest beat ever",
+      "perfect morning station",
+      "this is my work playlist",
+      "tea and this station equals peace",
       "needed this after a long day",
       "this feels like sunlight",
-      "quiet morning gang",
-      "Sunny Side is carrying my mood"
+      "Sunny Side is carrying the mood"
     ]
   }
 ];
-const REQUEST_TRACKS = [
-  {
-    name: "Downers At Dusk",
-    artist: "Talha Anjum",
-    src: "assets/audio/downers-at-dusk.mp3"
-  },
-  {
-    name: "Khana Badosh",
-    artist: "Talha Anjum",
-    src: "assets/audio/khana-badosh.mp3"
-  },
-  {
-    name: "Karachi Mera",
-    artist: "Talha Anjum",
-    src: "assets/audio/karachi-mera.mp3"
-  },
-  {
-    name: "Gumaan",
-    artist: "Talha Anjum",
-    src: "assets/audio/gumaan.mp3"
-  }
+
+const requestTracks = [
+  { name: "Velvet Static", artist: "Nightshift Archive" },
+  { name: "Rain On Glass", artist: "Sleepless Keys" },
+  { name: "Neon Side Street", artist: "Analog City" },
+  { name: "After Hours Loop", artist: "Tape Room" },
+  { name: "Soft Signal", artist: "Low Light Club" }
 ];
+
 const radioAudio = document.getElementById("radioAudio");
 const stationName = document.getElementById("stationName");
 const mainStationTitle = document.getElementById("mainStationTitle");
@@ -142,32 +125,28 @@ const muteBtn = document.getElementById("muteBtn");
 const volumeSlider = document.getElementById("volumeSlider");
 const clockDisplay = document.getElementById("clockDisplay");
 const listenerCount = document.getElementById("listenerCount");
+const signalStrength = document.getElementById("signalStrength");
 const chatLog = document.getElementById("chatLog");
 const requestForm = document.getElementById("requestForm");
-const requestInput = document.getElementById("requestInput");
 const requestTrackSelect = document.getElementById("requestTrackSelect");
 
-let currentStation = STATION_LIST[0];
+let currentStation = stationList[0];
 let currentTrackIndex = 0;
 let currentChatIndex = 0;
 let fakeListeners = 1284;
-
-let audioContext;
-let audioSource;
-let analyser;
-let dataArray;
+let animationFrameId = null;
+let audioContext = null;
+let audioSource = null;
+let analyser = null;
+let dataArray = null;
 let visualizerBars = [];
+let trackInterval = null;
+let listenerInterval = null;
+let chatTimeout = null;
+let fallbackOscillator = null;
+let fallbackGain = null;
 
-let trackInterval;
-let listenerInterval;
-let chatTimeout;
-let droneOscillator;
-let droneGain;
-
-/*
-   This starts the whole app when the page is ready.
-*/
-$(document).ready(function () {
+function initApp() {
   createStationButtons();
   loadRequestTracks();
   createVisualizerBars();
@@ -176,8 +155,7 @@ $(document).ready(function () {
   playStation("nightshift-fm", false);
   updateClock();
 
-  setInterval(updateClock, 1000);
-
+  window.setInterval(updateClock, 1000);
   playBtn.addEventListener("click", handlePlayButton);
   muteBtn.addEventListener("click", toggleMute);
   volumeSlider.addEventListener("input", handleVolumeChange);
@@ -186,72 +164,17 @@ $(document).ready(function () {
   dragWidget(document.getElementById("miniWidget"));
   dragWidget(document.getElementById("chatWidget"));
   dragWidget(document.getElementById("statsWidget"));
-});
-
-/*
-   This creates the audio system after the user clicks.
-*/
-function setupAudioContext() {
-  if (audioContext) {
-    return;
-  }
-
-  audioContext = new AudioContext();
-  audioSource = audioContext.createMediaElementSource(radioAudio);
-  analyser = audioContext.createAnalyser();
-
-  analyser.fftSize = 128;
-
-  const bufferLength = analyser.frequencyBinCount;
-  dataArray = new Uint8Array(bufferLength);
-
-  audioSource.connect(analyser);
-  analyser.connect(audioContext.destination);
 }
 
-/*
-   This creates the 32 big visualizer bars.
-*/
-function createVisualizerBars() {
-  visualizer.innerHTML = "";
-  visualizerBars = [];
-
-  for (let i = 0; i < 32; i++) {
-    const barElement = document.createElement("div");
-    barElement.className = "visualizer-bar";
-
-    visualizer.appendChild(barElement);
-    visualizerBars.push(barElement);
-  }
-}
-
-/*
-   This creates the small equalizer bars inside the floating mini widget.
-*/
-function createMiniEqualizer() {
-  miniEqualizer.innerHTML = "";
-
-  for (let i = 0; i < 12; i++) {
-    const miniBar = document.createElement("div");
-    miniBar.className = "mini-bar";
-    miniBar.style.animationDelay = `${i * 0.08}s`;
-    miniEqualizer.appendChild(miniBar);
-  }
-}
-
-/*
-   This creates one button for each fake radio station.
-*/
 function createStationButtons() {
   stationSelector.innerHTML = "";
 
-  STATION_LIST.forEach(function (station) {
+  stationList.forEach(function (station) {
     const button = document.createElement("button");
-
     button.className = "station-pill";
+    button.type = "button";
     button.textContent = `${station.name} / ${station.frequency}`;
     button.dataset.stationId = station.id;
-
     button.addEventListener("click", function () {
       playStation(station.id, true);
     });
@@ -260,26 +183,58 @@ function createStationButtons() {
   });
 }
 
-/*
-   This loads a station, updates the UI, changes color, and optionally starts audio.
-*/
+function loadRequestTracks() {
+  requestTracks.forEach(function (track, index) {
+    const optionElement = document.createElement("option");
+    optionElement.value = index;
+    optionElement.textContent = `${track.name} / ${track.artist}`;
+    requestTrackSelect.appendChild(optionElement);
+  });
+}
+
+function createVisualizerBars() {
+  visualizer.innerHTML = "";
+  visualizerBars = [];
+
+  for (let index = 0; index < 32; index += 1) {
+    const barElement = document.createElement("div");
+    barElement.className = "visualizer-bar";
+    visualizer.appendChild(barElement);
+    visualizerBars.push(barElement);
+  }
+}
+
+function createMiniEqualizer() {
+  miniEqualizer.innerHTML = "";
+
+  for (let index = 0; index < 12; index += 1) {
+    const miniBar = document.createElement("div");
+    miniBar.className = "mini-bar";
+    miniBar.style.animationDelay = `${index * 0.08}s`;
+    miniEqualizer.appendChild(miniBar);
+  }
+}
+
 function playStation(stationId, shouldStartAudio = true) {
-  currentStation = STATION_LIST.find(function (station) {
+  const selectedStation = stationList.find(function (station) {
     return station.id === stationId;
   });
 
+  if (!selectedStation) {
+    return;
+  }
+
+  currentStation = selectedStation;
   currentTrackIndex = 0;
   currentChatIndex = 0;
 
   document.documentElement.style.setProperty("--station-color", currentStation.color);
-
   stationName.textContent = currentStation.name;
   mainStationTitle.textContent = currentStation.name;
   frequencyDisplay.textContent = currentStation.frequency;
   vibeBadge.textContent = currentStation.vibe;
   djName.textContent = currentStation.dj;
-  trackName.textContent = currentStation.tracks[0];
-  miniTrack.textContent = currentStation.tracks[0];
+  setNowPlaying(currentStation.tracks[0]);
 
   radioAudio.src = currentStation.audioSrc;
   radioAudio.loop = true;
@@ -294,35 +249,62 @@ function playStation(stationId, shouldStartAudio = true) {
   }
 }
 
-/*
-   This highlights the active station button.
-*/
-function updateActiveStationButton() {
-  const stationButtons = document.querySelectorAll(".station-pill");
+function setNowPlaying(track) {
+  trackName.textContent = track;
+  miniTrack.textContent = track;
+}
 
-  stationButtons.forEach(function (button) {
+function updateActiveStationButton() {
+  document.querySelectorAll(".station-pill").forEach(function (button) {
     button.classList.toggle("active", button.dataset.stationId === currentStation.id);
   });
 }
 
-/*
-   This handles the Play and Pause button.
-*/
 function handlePlayButton() {
-  if (radioAudio.paused) {
+  if (radioAudio.paused && !fallbackOscillator) {
     startAudioPlayback();
-  } else {
-    radioAudio.pause();
-    stopDroneFallback();
-    playBtn.textContent = "Play";
+    return;
   }
+
+  pausePlayback();
 }
 
-/*
-   This starts the real audio file, or uses the fallback drone if the file is missing.
-*/
+function pausePlayback() {
+  radioAudio.pause();
+  stopFallbackTone();
+  playBtn.textContent = "Play";
+}
+
+function setupAudioContext() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContext) {
+    return false;
+  }
+
+  if (!audioContext) {
+    audioContext = new AudioContext();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 128;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+  }
+
+  if (!audioSource) {
+    audioSource = audioContext.createMediaElementSource(radioAudio);
+    audioSource.connect(analyser);
+    analyser.connect(audioContext.destination);
+  }
+
+  return true;
+}
+
 function startAudioPlayback() {
-  setupAudioContext();
+  const hasAudio = setupAudioContext();
+
+  if (!hasAudio) {
+    startVisualFallback();
+    return;
+  }
 
   if (audioContext.state === "suspended") {
     audioContext.resume();
@@ -330,275 +312,173 @@ function startAudioPlayback() {
 
   radioAudio.play()
     .then(function () {
-      stopDroneFallback();
+      stopFallbackTone();
       playBtn.textContent = "Pause";
       drawVisualizer();
     })
     .catch(function () {
-      startDroneFallback();
+      startFallbackTone();
       playBtn.textContent = "Pause";
       drawVisualizer();
-      appendChatMessage("Audio file missing, switching to emergency drone signal.", currentStation.dj);
+      appendChatMessage("Local audio file missing. Switching to generated signal.", currentStation.dj);
     });
 }
 
-/*
-   This reads live audio frequency data and turns it into bar heights.
-*/
-function drawVisualizer() {
-  if (!analyser || !dataArray) {
-    return;
-  }
-
-  analyser.getByteFrequencyData(dataArray);
-
-  visualizerBars.forEach(function (bar, index) {
-    let barHeight = 8;
-
-    if (!radioAudio.paused || droneOscillator) {
-      const dataIndex = index % dataArray.length;
-      barHeight = Math.max(8, dataArray[dataIndex] / 2.4);
-    }
-
-    bar.style.height = `${barHeight}%`;
-  });
-
-  requestAnimationFrame(drawVisualizer);
+function startVisualFallback() {
+  playBtn.textContent = "Pause";
+  drawVisualizer();
+  appendChatMessage("Audio API unavailable. Visual signal mode is active.", currentStation.dj);
 }
 
-/*
-   This saves the current volume in the browser.
-*/
+function drawVisualizer() {
+  window.cancelAnimationFrame(animationFrameId);
+
+  function renderFrame() {
+    if (analyser && dataArray) {
+      analyser.getByteFrequencyData(dataArray);
+    }
+
+    visualizerBars.forEach(function (bar, index) {
+      const audioHeight = dataArray ? dataArray[index % dataArray.length] / 2.2 : 0;
+      const fallbackHeight = 18 + Math.sin(Date.now() / 160 + index) * 18 + Math.random() * 14;
+      const isActive = !radioAudio.paused || fallbackOscillator;
+      const height = isActive ? Math.max(8, audioHeight || fallbackHeight) : 8;
+      bar.style.height = `${Math.min(100, height)}%`;
+    });
+
+    animationFrameId = window.requestAnimationFrame(renderFrame);
+  }
+
+  renderFrame();
+}
+
 function saveVolume(value) {
   localStorage.setItem("nightshift-volume", value);
 }
 
-/*
-   This loads saved volume from the browser.
-*/
 function loadVolume() {
   const savedVolume = localStorage.getItem("nightshift-volume");
   const volumeValue = savedVolume || "0.65";
-
   volumeSlider.value = volumeValue;
   radioAudio.volume = Number(volumeValue);
 }
 
-/*
-   This updates audio volume and saves it.
-*/
 function handleVolumeChange() {
-  radioAudio.volume = Number(volumeSlider.value);
+  const volume = Number(volumeSlider.value);
+  radioAudio.volume = volume;
 
-  if (droneGain) {
-    droneGain.gain.value = Number(volumeSlider.value) * 0.15;
+  if (fallbackGain) {
+    fallbackGain.gain.value = radioAudio.muted ? 0 : volume * 0.14;
   }
 
   saveVolume(volumeSlider.value);
 }
 
-/*
-   This mutes or unmutes the station.
-*/
 function toggleMute() {
   radioAudio.muted = !radioAudio.muted;
 
-  if (droneGain) {
-    droneGain.gain.value = radioAudio.muted ? 0 : Number(volumeSlider.value) * 0.15;
+  if (fallbackGain) {
+    fallbackGain.gain.value = radioAudio.muted ? 0 : Number(volumeSlider.value) * 0.14;
   }
 
   muteBtn.textContent = radioAudio.muted ? "Unmute" : "Mute";
 }
 
-/*
-   This updates the live clock every second.
-*/
 function updateClock() {
-  const now = new Date();
-
-  clockDisplay.textContent = now.toLocaleTimeString("en-US", {
+  clockDisplay.textContent = new Date().toLocaleTimeString("en-US", {
     hour12: false
   });
 }
 
-/*
-   This cycles through fake track names every 30 seconds.
-*/
 function cycleTrackName() {
-  currentTrackIndex++;
-
-  if (currentTrackIndex >= currentStation.tracks.length) {
-    currentTrackIndex = 0;
-  }
-
-  trackName.textContent = currentStation.tracks[currentTrackIndex];
-  miniTrack.textContent = currentStation.tracks[currentTrackIndex];
+  currentTrackIndex = (currentTrackIndex + 1) % currentStation.tracks.length;
+  setNowPlaying(currentStation.tracks[currentTrackIndex]);
 }
 
-/*
-   This updates the fake listener count so the station feels alive.
-*/
 function updateListenerCount() {
   const changeAmount = Math.floor(Math.random() * 8) - 2;
-
-  fakeListeners += changeAmount;
-
-  if (fakeListeners < 800) {
-    fakeListeners = 800;
-  }
-
-  if (fakeListeners > 4200) {
-    fakeListeners = 4200;
-  }
-
-  listenerCount.textContent = fakeListeners;
+  fakeListeners = Math.min(4200, Math.max(800, fakeListeners + changeAmount));
+  listenerCount.textContent = fakeListeners.toLocaleString();
+  signalStrength.textContent = `${Math.floor(Math.random() * 4) + 95}%`;
 }
 
-/*
-   This adds a new message bubble to the chat log.
-*/
 function appendChatMessage(message, sender = "listener") {
   const messageElement = document.createElement("div");
+  const senderElement = document.createElement("strong");
+  const textElement = document.createElement("span");
 
   messageElement.className = "chat-message";
-  messageElement.innerHTML = `
-    <strong>${sender}</strong>
-    <span>${message}</span>
-  `;
+  senderElement.textContent = sender;
+  textElement.textContent = message;
 
+  messageElement.append(senderElement, textElement);
   chatLog.appendChild(messageElement);
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-/*
-   This clears the chat and adds the first station messages.
-*/
 function resetChat() {
   chatLog.innerHTML = "";
-
   appendChatMessage(`You are tuned into ${currentStation.name}.`, currentStation.dj);
   appendChatMessage(currentStation.chatMessages[0], "nightlistener");
 }
 
-/*
-   This starts fake chat messages with random delays.
-*/
 function startFakeChatLoop() {
-  clearTimeout(chatTimeout);
+  window.clearTimeout(chatTimeout);
 
   const randomDelay = Math.floor(Math.random() * 30000) + 15000;
-
-  chatTimeout = setTimeout(function () {
-    currentChatIndex++;
-
-    if (currentChatIndex >= currentStation.chatMessages.length) {
-      currentChatIndex = 0;
-    }
-
+  chatTimeout = window.setTimeout(function () {
+    currentChatIndex = (currentChatIndex + 1) % currentStation.chatMessages.length;
     appendChatMessage(currentStation.chatMessages[currentChatIndex], getRandomUsername());
     startFakeChatLoop();
   }, randomDelay);
 }
 
-/*
-   This gives fake listeners random usernames.
-*/
 function getRandomUsername() {
   const usernames = [
     "sleepyUser",
     "staticKid",
     "chaiCoder",
     "midnightGuest",
-    "lofiGhost",
+    "lofiListener",
     "finalsSurvivor"
   ];
 
-  const randomIndex = Math.floor(Math.random() * usernames.length);
-
-  return usernames[randomIndex];
+  return usernames[Math.floor(Math.random() * usernames.length)];
 }
-/*
-   This loads all request tracks into the dropdown menu.
-*/
-function loadRequestTracks() {
-  REQUEST_TRACKS.forEach(function (track, index) {
 
-    const optionElement = document.createElement("option");
-
-    optionElement.value = index;
-
-    optionElement.textContent = `${track.name} / ${track.artist}`;
-
-    requestTrackSelect.appendChild(optionElement);
-
-  });
-}
-/*
-   This plays a selected requested track from the dropdown.
-*/
 function handleTrackRequest(event) {
-
   event.preventDefault();
 
-  const selectedTrackIndex = requestTrackSelect.value;
-
-  if (selectedTrackIndex === "") {
-
-    appendChatMessage(
-      "Select a track first before sending a request.",
-      currentStation.dj
-    );
-
+  if (requestTrackSelect.value === "") {
+    appendChatMessage("Select a track first before sending a request.", currentStation.dj);
     return;
   }
 
-  const selectedTrack = REQUEST_TRACKS[selectedTrackIndex];
+  const selectedTrack = requestTracks[Number(requestTrackSelect.value)];
+  const requestedTrack = `${selectedTrack.name} / ${selectedTrack.artist}`;
 
-  radioAudio.src = selectedTrack.src;
+  setNowPlaying(requestedTrack);
+  appendChatMessage(`Request accepted. Queuing "${selectedTrack.name}".`, currentStation.dj);
+  appendChatMessage(`"${selectedTrack.name}" requested by a night listener.`, "SYSTEM");
+  requestTrackSelect.value = "";
 
-  radioAudio.loop = true;
-
-  radioAudio.play();
-
-  playBtn.textContent = "Pause";
-
-  trackName.textContent =
-    `${selectedTrack.name} / ${selectedTrack.artist}`;
-
-  miniTrack.textContent =
-    `${selectedTrack.name} / ${selectedTrack.artist}`;
-
-  appendChatMessage(
-    `Request accepted. Now playing "${selectedTrack.name}".`,
-    currentStation.dj
-  );
-
-  appendChatMessage(
-    `"${selectedTrack.name}" requested by a night listener.`,
-    "SYSTEM"
-  );
+  if (!radioAudio.paused || fallbackOscillator) {
+    startFallbackTone();
+  }
 }
 
-/*
-   This restarts intervals when the station changes.
-*/
 function restartStationLoops() {
-  clearInterval(trackInterval);
-  clearInterval(listenerInterval);
-  clearTimeout(chatTimeout);
+  window.clearInterval(trackInterval);
+  window.clearInterval(listenerInterval);
+  window.clearTimeout(chatTimeout);
 
-  trackInterval = setInterval(cycleTrackName, 30000);
-  listenerInterval = setInterval(updateListenerCount, 3000);
-
+  trackInterval = window.setInterval(cycleTrackName, 30000);
+  listenerInterval = window.setInterval(updateListenerCount, 3000);
   startFakeChatLoop();
 }
 
-/*
-   This makes a widget draggable with mouse and touch.
-*/
 function dragWidget(widgetElement) {
   const handle = widgetElement.querySelector(".widget-handle");
-
   let isDragging = false;
   let offsetX = 0;
   let offsetY = 0;
@@ -606,9 +486,8 @@ function dragWidget(widgetElement) {
   handle.addEventListener("mousedown", startMouseDrag);
   document.addEventListener("mousemove", moveMouseDrag);
   document.addEventListener("mouseup", stopDrag);
-
-  handle.addEventListener("touchstart", startTouchDrag);
-  document.addEventListener("touchmove", moveTouchDrag);
+  handle.addEventListener("touchstart", startTouchDrag, { passive: true });
+  document.addEventListener("touchmove", moveTouchDrag, { passive: true });
   document.addEventListener("touchend", stopDrag);
 
   function startMouseDrag(event) {
@@ -637,7 +516,6 @@ function dragWidget(widgetElement) {
     }
 
     const touch = event.touches[0];
-
     isDragging = true;
     offsetX = touch.clientX - widgetElement.offsetLeft;
     offsetY = touch.clientY - widgetElement.offsetTop;
@@ -649,7 +527,6 @@ function dragWidget(widgetElement) {
     }
 
     const touch = event.touches[0];
-
     widgetElement.style.left = `${touch.clientX - offsetX}px`;
     widgetElement.style.top = `${touch.clientY - offsetY}px`;
   }
@@ -660,40 +537,34 @@ function dragWidget(widgetElement) {
   }
 }
 
-/*
-   This creates a simple generated drone if the audio file is missing.
-*/
-function startDroneFallback() {
-  if (droneOscillator) {
+function startFallbackTone() {
+  if (!setupAudioContext()) {
     return;
   }
 
-  setupAudioContext();
+  stopFallbackTone();
+  radioAudio.pause();
 
-  droneOscillator = audioContext.createOscillator();
-  droneGain = audioContext.createGain();
+  fallbackOscillator = audioContext.createOscillator();
+  fallbackGain = audioContext.createGain();
+  fallbackOscillator.type = "sine";
+  fallbackOscillator.frequency.value = currentStation.fallbackFrequency;
+  fallbackGain.gain.value = radioAudio.muted ? 0 : Number(volumeSlider.value) * 0.14;
 
-  droneOscillator.type = "sine";
-  droneOscillator.frequency.value = 110;
-  droneGain.gain.value = Number(volumeSlider.value) * 0.15;
-
-  droneOscillator.connect(droneGain);
-  droneGain.connect(analyser);
-
-  droneOscillator.start();
+  fallbackOscillator.connect(fallbackGain);
+  fallbackGain.connect(analyser);
+  fallbackOscillator.start();
 }
 
-/*
-   This stops the generated fallback drone.
-*/
-function stopDroneFallback() {
-  if (!droneOscillator) {
+function stopFallbackTone() {
+  if (!fallbackOscillator) {
     return;
   }
 
-  droneOscillator.stop();
-  droneOscillator.disconnect();
-
-  droneOscillator = null;
-  droneGain = null;
+  fallbackOscillator.stop();
+  fallbackOscillator.disconnect();
+  fallbackOscillator = null;
+  fallbackGain = null;
 }
+
+document.addEventListener("DOMContentLoaded", initApp);

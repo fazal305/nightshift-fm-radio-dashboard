@@ -1,104 +1,87 @@
-# NIGHTSHIFT FM
+# Nightshift FM Radio Dashboard
 
-A dark neon underground late-night radio dashboard built with HTML, CSS, JavaScript, Bootstrap 5, jQuery, and the Web Audio API.
+A moody late-night radio dashboard built with HTML, CSS, and vanilla JavaScript.
 
-NIGHTSHIFT FM simulates a fictional underground radio station with:
-- animated audio visualizers
-- fake DJs and live chat
-- draggable floating widgets
-- glowing radio UI
-- station switching
-- live listener stats
-- local audio playback
-- immersive late-night atmosphere
+Nightshift FM simulates a fictional online radio control room with station switching, animated visualizers, listener stats, floating widgets, request messages, live chat, and a generated fallback tone when local audio files are not available.
 
 ## Live Demo
 
-Experience the live underground radio dashboard here:
-
-🔗 Live Site:
 https://fazal305.github.io/nightshift-fm-radio-dashboard/
-
-Features available in the live demo:
-- Neon late-night radio UI
-- Animated audio visualizer
-- Fake underground radio stations
-- Draggable floating widgets
-- Live listener stats
-- Fake radio chat system
-- Real-time clock
-- Dynamic station themes
-
-Note:
-Local audio files are excluded from the public repository and live demo for copyright reasons.
-To experience full audio playback, add your own local audio files inside:
-
-```txt id="pabdd4"
-assets/audio/
-
----
 
 ## Features
 
 - Full-screen neon radio dashboard
-- Real audio playback
-- 32-bar animated equalizer visualizer
-- Multiple fake radio stations
-- Fake live DJs and track rotations
-- Live updating listener counter
-- Draggable floating widgets
-- Fake live chat system
-- Track request system
-- LocalStorage volume saving
-- Real-time digital clock
-- Mute / unmute controls
-- Mobile responsive layout
+- Multiple fictional radio stations
 - Dynamic station color themes
+- Animated 32-bar visualizer
+- Generated fallback audio when local tracks are missing
+- Play, pause, mute, and volume controls
+- Saved volume preference with `localStorage`
+- Real-time clock
+- Fake listener counter
+- Simulated live chat
+- Fictional track request flow
+- Draggable desktop widgets
+- Responsive mobile layout
+- Reduced-motion support
 
----
+## Audio Notice
 
-## Technologies Used
+This repository does not include music files. The app supports local audio files for personal testing, but the public demo uses a generated fallback tone when files are missing.
+
+To test with your own audio, add files under:
+
+```text
+assets/audio/
+```
+
+Then update the audio file paths in `nightshift-script.js`.
+
+Only use audio that you created, own, or have permission to use.
+
+## Tech Stack
 
 - HTML5
 - CSS3
 - Vanilla JavaScript
-- Bootstrap 5
-- jQuery
 - Web Audio API
-- LocalStorage API
-
----
+- localStorage API
 
 ## Project Structure
 
-```txt
-nightshift-fm/
-│
-├── index.html
-├── nightshift-styles.css
-├── nightshift-script.js
-│
-├── assets/
-│   └── audio/
-│
-├── README.md
-└── .gitignore
+```text
+nightshift-fm-radio-dashboard/
+|-- index.html
+|-- nightshift-styles.css
+|-- nightshift-script.js
+|-- LICENSE
+`-- README.md
+```
 
-## Audio Files Notice
+## What I Practiced
 
-This project supports local audio playback for the immersive radio experience.
+- Building a themed dashboard UI
+- Managing interactive state without a framework
+- Working with audio playback and browser audio fallback
+- Rendering stations, chat, and request options from JavaScript data
+- Saving user preferences with `localStorage`
+- Creating animated visual feedback with CSS and JavaScript
+- Handling draggable widgets on larger screens
+- Designing a responsive interface for desktop and mobile
 
-The original development version used locally stored MP3 tracks for personal testing and atmosphere design. Those audio files are intentionally excluded from this public repository using `.gitignore`.
+## Run Locally
 
-Reason:
-- The tracks used during development may be copyrighted material.
-- This repository only contains the application source code and UI system.
-- Users should add their own local audio files inside:
+Open `index.html` in a browser.
 
-assets/audio/
+No build step or package installation is required.
 
-Recommended formats:
-- .mp3
-- ambient / lo-fi / synthwave / instrumental tracks
+## Author
 
-This project is intended for educational and portfolio purposes only.
+Built by Fazal Abbas.
+
+- GitHub: https://github.com/fazal305
+- LinkedIn: https://www.linkedin.com/in/fazal-abbas-4653dg86
+
+## License
+
+This project is licensed under the MIT License. Audio files are not included.
