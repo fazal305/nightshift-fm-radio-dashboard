@@ -13,7 +13,7 @@ const stationList = [
       "3am coffee / lo-fi beats",
       "neon city drift / synthwave collective",
       "last train home / chill hop",
-      "empty streets / soft keys"
+      "empty streets / soft keys",
     ],
     chatMessages: [
       "studying late with this in the background",
@@ -21,8 +21,8 @@ const stationList = [
       "volume low, vibes high",
       "this feels like rain on a window",
       "anyone else coding right now",
-      "DJ Sleepless never misses"
-    ]
+      "DJ Sleepless never misses",
+    ],
   },
   {
     id: "codewave-radio",
@@ -38,7 +38,7 @@ const stationList = [
       "compile time / ambient",
       "git blame / lo-fi",
       "merge conflict dreams",
-      "localhost after dark"
+      "localhost after dark",
     ],
     chatMessages: [
       "shipping late again",
@@ -46,8 +46,8 @@ const stationList = [
       "css finally behaving because of this beat",
       "debugging with this in the background",
       "frontend crew awake",
-      "this beat fixed my layout"
-    ]
+      "this beat fixed my layout",
+    ],
   },
   {
     id: "static-signal",
@@ -63,7 +63,7 @@ const stationList = [
       "frequency unknown / drone",
       "dead channel / ambient",
       "numbers station / midnight tape",
-      "red light hallway / static"
+      "red light hallway / static",
     ],
     chatMessages: [
       "the signal keeps cutting out",
@@ -71,8 +71,8 @@ const stationList = [
       "static is part of the track",
       "low light, high focus",
       "this one belongs after midnight",
-      "the mix is unreal"
-    ]
+      "the mix is unreal",
+    ],
   },
   {
     id: "solar-drift",
@@ -88,7 +88,7 @@ const stationList = [
       "rooftop sunset / chill",
       "warm window / soft keys",
       "slow clouds / daydream tape",
-      "sunbeam radio / mellow"
+      "sunbeam radio / mellow",
     ],
     chatMessages: [
       "perfect morning station",
@@ -96,9 +96,9 @@ const stationList = [
       "tea and this station equals peace",
       "needed this after a long day",
       "this feels like sunlight",
-      "Sunny Side is carrying the mood"
-    ]
-  }
+      "Sunny Side is carrying the mood",
+    ],
+  },
 ];
 
 const requestTracks = [
@@ -106,7 +106,7 @@ const requestTracks = [
   { name: "Rain On Glass", artist: "Sleepless Keys" },
   { name: "Neon Side Street", artist: "Analog City" },
   { name: "After Hours Loop", artist: "Tape Room" },
-  { name: "Soft Signal", artist: "Low Light Club" }
+  { name: "Soft Signal", artist: "Low Light Club" },
 ];
 
 const radioAudio = document.getElementById("radioAudio");
@@ -228,7 +228,10 @@ function playStation(stationId, shouldStartAudio = true) {
   currentTrackIndex = 0;
   currentChatIndex = 0;
 
-  document.documentElement.style.setProperty("--station-color", currentStation.color);
+  document.documentElement.style.setProperty(
+    "--station-color",
+    currentStation.color,
+  );
   stationName.textContent = currentStation.name;
   mainStationTitle.textContent = currentStation.name;
   frequencyDisplay.textContent = currentStation.frequency;
@@ -256,7 +259,10 @@ function setNowPlaying(track) {
 
 function updateActiveStationButton() {
   document.querySelectorAll(".station-pill").forEach(function (button) {
-    button.classList.toggle("active", button.dataset.stationId === currentStation.id);
+    button.classList.toggle(
+      "active",
+      button.dataset.stationId === currentStation.id,
+    );
   });
 }
 
@@ -310,7 +316,8 @@ function startAudioPlayback() {
     audioContext.resume();
   }
 
-  radioAudio.play()
+  radioAudio
+    .play()
     .then(function () {
       stopFallbackTone();
       playBtn.textContent = "Pause";
@@ -320,14 +327,20 @@ function startAudioPlayback() {
       startFallbackTone();
       playBtn.textContent = "Pause";
       drawVisualizer();
-      appendChatMessage("Local audio file missing. Switching to generated signal.", currentStation.dj);
+      appendChatMessage(
+        "Local audio file missing. Switching to generated signal.",
+        currentStation.dj,
+      );
     });
 }
 
 function startVisualFallback() {
   playBtn.textContent = "Pause";
   drawVisualizer();
-  appendChatMessage("Audio API unavailable. Visual signal mode is active.", currentStation.dj);
+  appendChatMessage(
+    "Audio API unavailable. Visual signal mode is active.",
+    currentStation.dj,
+  );
 }
 
 function drawVisualizer() {
@@ -339,8 +352,11 @@ function drawVisualizer() {
     }
 
     visualizerBars.forEach(function (bar, index) {
-      const audioHeight = dataArray ? dataArray[index % dataArray.length] / 2.2 : 0;
-      const fallbackHeight = 18 + Math.sin(Date.now() / 160 + index) * 18 + Math.random() * 14;
+      const audioHeight = dataArray
+        ? dataArray[index % dataArray.length] / 2.2
+        : 0;
+      const fallbackHeight =
+        18 + Math.sin(Date.now() / 160 + index) * 18 + Math.random() * 14;
       const isActive = !radioAudio.paused || fallbackOscillator;
       const height = isActive ? Math.max(8, audioHeight || fallbackHeight) : 8;
       bar.style.height = `${Math.min(100, height)}%`;
@@ -378,7 +394,9 @@ function toggleMute() {
   radioAudio.muted = !radioAudio.muted;
 
   if (fallbackGain) {
-    fallbackGain.gain.value = radioAudio.muted ? 0 : Number(volumeSlider.value) * 0.14;
+    fallbackGain.gain.value = radioAudio.muted
+      ? 0
+      : Number(volumeSlider.value) * 0.14;
   }
 
   muteBtn.textContent = radioAudio.muted ? "Unmute" : "Mute";
@@ -386,7 +404,7 @@ function toggleMute() {
 
 function updateClock() {
   clockDisplay.textContent = new Date().toLocaleTimeString("en-US", {
-    hour12: false
+    hour12: false,
   });
 }
 
@@ -418,7 +436,10 @@ function appendChatMessage(message, sender = "listener") {
 
 function resetChat() {
   chatLog.innerHTML = "";
-  appendChatMessage(`You are tuned into ${currentStation.name}.`, currentStation.dj);
+  appendChatMessage(
+    `You are tuned into ${currentStation.name}.`,
+    currentStation.dj,
+  );
   appendChatMessage(currentStation.chatMessages[0], "nightlistener");
 }
 
@@ -427,8 +448,12 @@ function startFakeChatLoop() {
 
   const randomDelay = Math.floor(Math.random() * 30000) + 15000;
   chatTimeout = window.setTimeout(function () {
-    currentChatIndex = (currentChatIndex + 1) % currentStation.chatMessages.length;
-    appendChatMessage(currentStation.chatMessages[currentChatIndex], getRandomUsername());
+    currentChatIndex =
+      (currentChatIndex + 1) % currentStation.chatMessages.length;
+    appendChatMessage(
+      currentStation.chatMessages[currentChatIndex],
+      getRandomUsername(),
+    );
     startFakeChatLoop();
   }, randomDelay);
 }
@@ -440,7 +465,7 @@ function getRandomUsername() {
     "chaiCoder",
     "midnightGuest",
     "lofiListener",
-    "finalsSurvivor"
+    "finalsSurvivor",
   ];
 
   return usernames[Math.floor(Math.random() * usernames.length)];
@@ -450,7 +475,10 @@ function handleTrackRequest(event) {
   event.preventDefault();
 
   if (requestTrackSelect.value === "") {
-    appendChatMessage("Select a track first before sending a request.", currentStation.dj);
+    appendChatMessage(
+      "Select a track first before sending a request.",
+      currentStation.dj,
+    );
     return;
   }
 
@@ -458,8 +486,14 @@ function handleTrackRequest(event) {
   const requestedTrack = `${selectedTrack.name} / ${selectedTrack.artist}`;
 
   setNowPlaying(requestedTrack);
-  appendChatMessage(`Request accepted. Queuing "${selectedTrack.name}".`, currentStation.dj);
-  appendChatMessage(`"${selectedTrack.name}" requested by a night listener.`, "SYSTEM");
+  appendChatMessage(
+    `Request accepted. Queuing "${selectedTrack.name}".`,
+    currentStation.dj,
+  );
+  appendChatMessage(
+    `"${selectedTrack.name}" requested by a night listener.`,
+    "SYSTEM",
+  );
   requestTrackSelect.value = "";
 
   if (!radioAudio.paused || fallbackOscillator) {
@@ -549,7 +583,9 @@ function startFallbackTone() {
   fallbackGain = audioContext.createGain();
   fallbackOscillator.type = "sine";
   fallbackOscillator.frequency.value = currentStation.fallbackFrequency;
-  fallbackGain.gain.value = radioAudio.muted ? 0 : Number(volumeSlider.value) * 0.14;
+  fallbackGain.gain.value = radioAudio.muted
+    ? 0
+    : Number(volumeSlider.value) * 0.14;
 
   fallbackOscillator.connect(fallbackGain);
   fallbackGain.connect(analyser);
